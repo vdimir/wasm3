@@ -1,24 +1,28 @@
 #include <stddef.h>
 #include <stdint.h>
-
-extern int sum(int, int);
-extern int ext_memcpy(void*, const void*, size_t);
+#include <stdlib.h>
 
 #define WASM_EXPORT __attribute__((used)) __attribute__((visibility ("default")))
 
-int WASM_EXPORT test(int32_t arg1, int32_t arg2)
+char * WASM_EXPORT allocate_test(uint32_t v)
 {
-    int x = arg1 + arg2;
-    int y = arg1 - arg2;
-    return sum(x, y) / 2;
+    // TOTAL_MEMORY
+    size_t n = 33554432;
+    char * x = malloc(n);
+
+    for (size_t i = 0; i < n; i++)
+    {
+        x[i] = v;
+    }
+    return x;
 }
 
-int64_t WASM_EXPORT test_memcpy(void)
+uint32_t WASM_EXPORT test(char * buf, uint32_t size)
 {
-    int64_t x = 0;
-    int32_t low = 0x01234567;
-    int32_t high = 0x89abcdef;
-    ext_memcpy(&x, &low, 4);
-    ext_memcpy(((uint8_t*)&x) + 4, &high, 4);
-    return x;
+    uint32_t res = 0;
+    for (size_t i = 0; i < size; i++)
+    {
+        res += (uint32_t)buf[i];
+    }
+    return res;
 }
